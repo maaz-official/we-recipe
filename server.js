@@ -21,9 +21,10 @@ app.use(express.json());
 
 // CORS configuration
 const corsOptions = {
-    origin: ['http://localhost:8081', "http://localhost:3000"],
-    credentials: true, // Allow credentials such as cookies or authorization headers
-};
+    origin: ["http://localhost:8081", "http://localhost:3000"], // Add allowed origins
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    credentials: true, // Include credentials if needed
+  };
 app.use(cors(corsOptions)); // Use CORS middleware with options
 
 

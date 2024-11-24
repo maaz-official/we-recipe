@@ -4,11 +4,15 @@ import cors from 'cors'; // Import cors
 import connectDB from './config/db.js';
 import recipeRoutes from './routes/recipeRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import path from 'path'
 
 dotenv.config();
 connectDB(); // Optional if you use a database
 
 const app = express();
+
+// Serve static files from the uploads folder
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Middleware
 app.use(cors()); // Enable CORS
@@ -21,6 +25,7 @@ const corsOptions = {
     credentials: true, // Allow credentials such as cookies or authorization headers
 };
 app.use(cors(corsOptions)); // Use CORS middleware with options
+
 
 // Routes
 app.use('/recipes', recipeRoutes);

@@ -40,7 +40,7 @@ export const createRecipe = async (req, res) => {
       cookingTime,
       servings,
       image,
-      createdBy: req.user._id, // Assuming user is authenticated
+      createdBy: req.user?._id || null, // Ensure createdBy is optional or handled correctly
     });
 
     const savedRecipe = await newRecipe.save();

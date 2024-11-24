@@ -1,26 +1,23 @@
 import express from 'express';
 import {
-  registerUser,
-  loginUser,
-  getUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
-} from '../controllers/userController.js';
-import { protect, admin } from '../middlewares/authMiddleware.js';
+  getAllRecipes,
+  getRecipeById,
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+} from '../controllers/recipeController.js';
+import { upload } from '../controllers/recipeController.js'; // Import multer configuration
 
 const router = express.Router();
 
-// Public routes
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+// CRUD Operations for Recipes
+router.get('/', getAllRecipes);        // Get all recipes
+router.get('/:id', getRecipeById);     // Get recipe by ID
 
-// Protected routes
-router.get('/', protect, admin, getUsers); // Only admins can get all users
-router.get('/:id', protect, getUserById); // Any authenticated user can get their data
+// Apply `upload.single('image')` middleware to handle image uploads for both create and update operations
+router.post('/', upload.single('image'), createRecipe); // Create a new recipe with image upload
+router.put('/:id', upload.single('image'), updateRecipe); // Update an existing recipe with optional image upload
 
-// Admin-protected routes
-router.put('/:id', protect, admin, updateUser);
-router.delete('/:id', protect, admin, deleteUser);
+router.delete('/:id', deleteRecipe);   // Delete a recipe
 
 export default router;

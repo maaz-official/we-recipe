@@ -4,7 +4,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import recipeRoutes from './routes/recipeRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import path from 'path';
+// import path from 'path';
 
 dotenv.config();
 connectDB(); // Connect to the database
@@ -12,7 +12,7 @@ connectDB(); // Connect to the database
 const app = express();
 
 // Serve static files (e.g., images) from the "uploads" directory
-app.use('/uploads', express.static(path.resolve('uploads')));
+// app.use('/uploads', express.static(path.resolve('uploads')));
 
 // Middleware to parse JSON bodies in requests
 app.use(express.json());

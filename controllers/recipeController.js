@@ -1,5 +1,4 @@
 import Recipe from "../models/Recipe.js";
-import User from "../models/User.js"; // Assuming you have a User model
 import multer from "multer";
 import path from "path";
 
@@ -36,7 +35,7 @@ export const getAllRecipes = async (req, res) => {
     const recipes = await Recipe.find();
     res.json(recipes);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch recipes." });
   }
 };
 
@@ -49,7 +48,7 @@ export const getRecipeById = async (req, res) => {
     }
     res.json(recipe);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch the recipe." });
   }
 };
 
@@ -58,7 +57,7 @@ export const createRecipe = [
   upload.single("image"), // Middleware for handling single file upload
   async (req, res) => {
     try {
-      const { title, description, ingredients, cookingTime, servings, createdBy } = req.body;
+      const { title, description, ingredients, cookingTime, servings, imageUrl } = req.body;
 
       // Validate required fields
       if (!title || !description || !ingredients || !cookingTime || !servings) {
@@ -79,14 +78,13 @@ export const createRecipe = [
         ingredients: parsedIngredients,
         cookingTime,
         servings,
-        image: req.file ? `/uploads/${req.file.filename}` : null, // Store image path
-        createdBy: req.user?._id || null, // Ensure createdBy is optional or handled correctly
+        image: req.file ? `/uploads/${req.file.filename}` : imageUrl || null, // Store uploaded image or provided URL
       });
 
       const savedRecipe = await newRecipe.save();
       res.status(201).json(savedRecipe);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Failed to create the recipe." });
     }
   },
 ];
@@ -97,35 +95,29 @@ export const updateRecipe = [
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { title, description, ingredients, cookingTime, servings } = req.body;
+      const { title, description, ingredients, cookingTime, servings, imageUrl } = req.body;
 
       const recipe = await Recipe.findById(id);
       if (!recipe) {
         return res.status(404).json({ error: "Recipe not found" });
       }
 
-      // Check if the authenticated user is the owner of the recipe
-      if (req.user && recipe.createdBy.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ error: "You are not authorized to update this recipe" });
-      }
-
       // Update fields
       recipe.title = title || recipe.title;
       recipe.description = description || recipe.description;
-      recipe.ingredients =
-        (ingredients && JSON.parse(ingredients)) || recipe.ingredients;
+      recipe.ingredients = ingredients
+        ? JSON.parse(ingredients) || ingredients.split(",").map((item) => item.trim())
+        : recipe.ingredients;
       recipe.cookingTime = cookingTime || recipe.cookingTime;
       recipe.servings = servings || recipe.servings;
 
       // Update image if provided
-      if (req.file) {
-        recipe.image = `/uploads/${req.file.filename}`;
-      }
+      recipe.image = req.file ? `/uploads/${req.file.filename}` : imageUrl || recipe.image;
 
       const updatedRecipe = await recipe.save();
       res.json(updatedRecipe);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Failed to update the recipe." });
     }
   },
 ];
@@ -140,14 +132,9 @@ export const deleteRecipe = async (req, res) => {
       return res.status(404).json({ error: "Recipe not found" });
     }
 
-    // Check if the authenticated user is the owner of the recipe
-    if (req.user && recipe.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: "You are not authorized to delete this recipe" });
-    }
-
     await recipe.remove();
-    res.json({ message: "Recipe deleted successfully" });
+    res.json({ message: "Recipe deleted successfully." });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to delete the recipe." });
   }
 };
